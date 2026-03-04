@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Voice2Sense - Clean Light Theme */
+
+@layer base {
+  :root {
+    --background: 230 25% 97%;
+    --foreground: 224 30% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 30% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 30% 18%;
+
+    /* Primary - Deep indigo/blue */
+    --primary: 245 58% 51%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Light lavender */
+    --secondary: 240 20% 95%;
+    --secondary-foreground: 224 30% 18%;
+
+    /* Muted */
+    --muted: 230 15% 93%;
+    --muted-foreground: 220 10% 46%;
+
+    /* Accent - Warm amber */
+    --accent: 45 93% 47%;
+    --accent-foreground: 224 30% 18%;
+
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 230 15% 88%;
+    --input: 230 15% 90%;
+    --ring: 245 58% 51%;
+
+    --radius: 0.75rem;
+
+    /* Caption display */
+    --caption-bg: 220 15% 25%;
+    --caption-text: 60 100% 97%;
+    --caption-highlight: 245 58% 60%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 224 30% 18%;
+    --sidebar-primary: 245 58% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 20% 95%;
+    --sidebar-accent-foreground: 224 30% 18%;
+    --sidebar-border: 230 15% 88%;
+    --sidebar-ring: 245 58% 51%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  /* Caption display container */
+  .caption-display {
+    @apply bg-[hsl(var(--caption-bg))] rounded-2xl p-8;
+  }
+
+  /* Caption text styling */
+  .caption-text {
+    @apply text-[hsl(var(--caption-text))] leading-relaxed;
+  }
+
+  /* Feature card */
+  .feature-card {
+    @apply bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:shadow-md;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-card border border-border rounded-xl p-5;
+  }
+
+  /* Info card */
+  .info-card {
+    @apply bg-card border border-border rounded-xl p-5;
+  }
+}
+
+@layer utilities {
+  .caption-xs { font-size: 1rem; line-height: 1.5; }
+  .caption-sm { font-size: 1.25rem; line-height: 1.5; }
+  .caption-md { font-size: 1.5rem; line-height: 1.6; }
+  .caption-lg { font-size: 2rem; line-height: 1.6; }
+  .caption-xl { font-size: 2.5rem; line-height: 1.7; }
+  .caption-2xl { font-size: 3rem; line-height: 1.7; }
+}
