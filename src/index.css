@@ -102,6 +102,39 @@
   .info-card {
     @apply bg-card border border-border rounded-xl p-5;
   }
+
+  /* --- Two-Way Conversation Layout --- */
+
+  .conversation-grid {
+    @apply items-stretch;
+    min-height: calc(100vh - 200px);
+  }
+
+  .panel-speaking {
+    animation: speakingPulse 2s ease-in-out infinite;
+  }
+
+  .panel-waiting {
+    filter: saturate(0.6);
+  }
+
+  /* Navy blue chat area */
+  .chat-area {
+    background: linear-gradient(180deg, #0f1b2d 0%, #152238 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Spoken text bubble */
+  .chat-bubble-spoken {
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 3px solid hsl(245, 58%, 51%);
+  }
+
+  /* Translation bubble */
+  .chat-bubble-translated {
+    background: rgba(99, 102, 241, 0.08);
+    border-left: 3px solid rgba(99, 102, 241, 0.3);
+  }
 }
 
 @layer utilities {
@@ -111,4 +144,14 @@
   .caption-lg { font-size: 2rem; line-height: 1.6; }
   .caption-xl { font-size: 2.5rem; line-height: 1.7; }
   .caption-2xl { font-size: 3rem; line-height: 1.7; }
+}
+
+/* Speaking pulse animation */
+@keyframes speakingPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(245 58% 51% / 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px hsl(245 58% 51% / 0.15);
+  }
 }

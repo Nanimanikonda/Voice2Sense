@@ -160,6 +160,21 @@ const SettingsPanel = ({
                   }
                 />
               </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="live-caption" className="text-muted-foreground">
+                  Live Caption Animation
+                </Label>
+                <Switch
+                  id="live-caption"
+                  checked={captionSettings.liveCaptionAnimation}
+                  onCheckedChange={(checked) =>
+                    onCaptionSettingsChange({
+                      ...captionSettings,
+                      liveCaptionAnimation: checked,
+                    })
+                  }
+                />
+              </div>
             </div>
           </div>
 

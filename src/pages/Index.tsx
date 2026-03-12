@@ -1,16 +1,12 @@
-import { useState, useCallback, useEffect } from "react"; 
+import { useState } from "react";
 import Header from "@/components/voice2sense/Header";
-import StatsCards from "@/components/voice2sense/StatsCards";
-import LanguageSelector from "@/components/voice2sense/LanguageSelector";
-import CaptionDisplay from "@/components/voice2sense/CaptionDisplay";
-import ActionControls from "@/components/voice2sense/ActionControls";
-import ProductionInfo from "@/components/voice2sense/ProductionInfo";
-import Footer from "@/components/voice2sense/Footer";
+import Sidebar from "@/components/voice2sense/Sidebar";
+import ConversationPanel from "@/components/voice2sense/ConversationPanel";
 import SettingsPanel from "@/components/voice2sense/SettingsPanel";
-import HistoryPanel, {
-  type SessionRecord,
-} from "@/components/voice2sense/HistoryPanel";
-import { useTranscription } from "@/hooks/useTranscription";
+import HistoryPanel from "@/components/voice2sense/HistoryPanel";
+import { useConversation } from "@/hooks/useConversation";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import {
   type CaptionSettings,
   type AudioSettings,
@@ -19,116 +15,84 @@ import {
 } from "@/types/voice2sense";
 
 const Index = () => {
-  const [sourceLanguage, setSourceLanguage] = useState("en"); 
-  const [targetLanguages, setTargetLanguages] = useState<string[]>(["hi"]);
-  const [captionSettings, setCaptionSettings] = useState<CaptionSettings>(DEFAULT_CAPTION_SETTINGS);
-  const [audioSettings, setAudioSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
-  const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [captionSettings, setCaptionSettings] = useState<CaptionSettings>(DEFAULT_CAPTION_SETTINGS);
+  const [audioSettings, setAudioSettings] = useState<AudioSettings>(DEFAULT_AUDIO_SETTINGS);
 
   const {
-    isConnecting,
-    isRecording,
+    leftLanguage,
+    rightLanguage,
+    activeSpeaker,
+    messages,
     partialText,
-    segments,
-    error,
-    toggleRecording,
-    clearSession,
-  } = useTranscription({
-    sourceLanguage,
-    targetLanguages,
-    audioSettings,
-  });
+    sessions,
+    setLeftLanguage,
+    setRightLanguage,
+    startRecording,
+    stopRecording,
+    clearMessages,
+    clearSessions,
+  } = useConversation();
 
-  // NEW: Effect to restart transcription when the source language changes
-  useEffect(() => {
-    if (isRecording) {
-      console.log(`Language changed to ${sourceLanguage}. Restarting listener...`);
-      toggleRecording(); // Stop current session
-      setTimeout(() => {
-        toggleRecording(); // Restart session with new native script (e.g., Telugu)
-      }, 300);
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      navigate("/auth");
     }
-  }, [sourceLanguage]); 
-
-  const handleToggleRecording = useCallback(() => {
-    if (isRecording) {
-      if (segments.length > 0 && sessionStartTime) {
-        const session: SessionRecord = {
-          id: `session-${Date.now()}`,
-          startTime: sessionStartTime,
-          endTime: new Date(),
-          segments: [...segments],
-        };
-        setSessions((prev) => [session, ...prev]);
-      }
-    } else {
-      setSessionStartTime(new Date());
-      if (!isRecording) clearSession();
-    }
-    toggleRecording();
-  }, [isRecording, toggleRecording, segments, sessionStartTime, clearSession]);
-
-  const handleTargetToggle = useCallback((code: string) => {
-    setTargetLanguages((prev) =>
-      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-    );
-  }, []);
-
-  const handleClearHistory = useCallback(() => {
-    setSessions([]);
-  }, []);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* UPDATED: Added sourceLanguage and onSourceChange props here */}
-      <Header
-        sourceLanguage={sourceLanguage}
-        onSourceChange={setSourceLanguage}
-        onSettingsClick={() => setSettingsOpen(true)}
+    <div className="h-screen w-full flex bg-background overflow-hidden relative">
+      <Sidebar 
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
         onHistoryClick={() => setHistoryOpen(true)}
+        onSettingsClick={() => setSettingsOpen(true)}
+        onLogoutClick={handleLogout}
       />
 
-      <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
-          <StatsCards
-            segments={segments}
-            sessionStartTime={sessionStartTime}
-            isRecording={isRecording}
-          />
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <Header onSettingsClick={() => setSettingsOpen(true)} />
 
-          <div className="info-card">
-            <LanguageSelector
-              sourceLanguage={sourceLanguage}
-              targetLanguages={targetLanguages}
-              onSourceChange={setSourceLanguage}
-              onTargetToggle={handleTargetToggle}
-            />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto h-full flex flex-col">
+            <div className="conversation-grid grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 flex-1 min-h-0">
+              {/* Left Panel */}
+              <ConversationPanel
+                language={leftLanguage}
+                onLanguageChange={setLeftLanguage}
+                isRecording={activeSpeaker === "left"}
+                isDisabled={activeSpeaker === "right"}
+                messages={messages}
+                partialText={activeSpeaker === "left" ? partialText : ""}
+                onStartRecording={() => startRecording("left")}
+                onStopRecording={stopRecording}
+                onClearConversation={clearMessages}
+                captionSettings={captionSettings}
+                side="left"
+              />
+
+              {/* Right Panel */}
+              <ConversationPanel
+                language={rightLanguage}
+                onLanguageChange={setRightLanguage}
+                isRecording={activeSpeaker === "right"}
+                isDisabled={activeSpeaker === "left"}
+                messages={messages}
+                partialText={activeSpeaker === "right" ? partialText : ""}
+                onStartRecording={() => startRecording("right")}
+                onStopRecording={stopRecording}
+                onClearConversation={clearMessages}
+                captionSettings={captionSettings}
+                side="right"
+              />
+            </div>
           </div>
-
-          <CaptionDisplay
-            segments={segments}
-            partialText={partialText}
-            settings={captionSettings}
-            showTranslation={targetLanguages.length > 0}
-          />
-
-          <ActionControls
-            isRecording={isRecording}
-            isConnecting={isConnecting}
-            error={error}
-            segments={segments}
-            onToggleRecording={handleToggleRecording}
-            onSettingsClick={() => setSettingsOpen(true)}
-          />
-
-          <ProductionInfo />
-        </div>
-      </main>
-
-      <Footer />
+        </main>
+      </div>
 
       <SettingsPanel
         open={settingsOpen}
@@ -143,7 +107,7 @@ const Index = () => {
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         sessions={sessions}
-        onClearHistory={handleClearHistory}
+        onClearHistory={clearSessions}
       />
     </div>
   );

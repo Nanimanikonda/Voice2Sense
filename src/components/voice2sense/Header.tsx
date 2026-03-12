@@ -1,24 +1,24 @@
-import { Languages, History, Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, User, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { INDIAN_LANGUAGES } from "@/types/voice2sense";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import BackendStatus from "./BackendStatus";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface HeaderProps {
-  sourceLanguage: string;
-  onSourceChange: (code: string) => void;
   onSettingsClick: () => void;
-  onHistoryClick: () => void;
+  title?: string;
 }
 
-const Header = ({ sourceLanguage, onSourceChange, onSettingsClick, onHistoryClick }: HeaderProps) => {
+const Header = ({ onSettingsClick, title = "Live Translation" }: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -29,57 +29,47 @@ const Header = ({ sourceLanguage, onSourceChange, onSettingsClick, onHistoryClic
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+    <header className="sticky top-0 z-10 flex items-center justify-between px-6 py-3 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Languages className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-primary">Voice2Sense</h1>
-          <p className="text-xs text-muted-foreground">Real-Time Multilingual Closed Captioning</p>
-        </div>
+        <h1 className="text-xl font-semibold">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* SPEAKING IN LABEL */}
-        <span className="text-sm font-medium text-muted-foreground mr-1">Speaking In:</span>
-        <Select value={sourceLanguage} onValueChange={onSourceChange}>
-          <SelectTrigger className="w-[180px] bg-card border-primary/20">
-            <SelectValue placeholder="Select Language" />
-          </SelectTrigger>
-          <SelectContent>
-            {/* Removed Auto-detect to ensure the browser uses the correct native script engine */}
-            {INDIAN_LANGUAGES.map((lang) => (
-              <SelectItem key={lang.code} value={lang.code}>
-                {lang.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex items-center gap-4">
+        <BackendStatus />
 
-        <Button
-          variant="outline"
-          onClick={onHistoryClick}
-          className="gap-2 ml-4"
-        >
-          <History className="w-4 h-4" />
-          History
-        </Button>
-        <Button
-          variant="outline"
-          onClick={onSettingsClick}
-          size="icon"
-        >
-          <Settings className="w-4 h-4" />
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Moon className="w-4 h-4" />
         </Button>
 
-        <Button
-          onClick={handleLogout}
-          className="gap-2 bg-red-600 hover:bg-red-700 text-white border-none"
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/20 text-primary">U</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">User</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  user@voice2sense.com
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onSettingsClick}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

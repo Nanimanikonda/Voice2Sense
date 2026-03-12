@@ -13,6 +13,7 @@ export interface CaptionSettings {
   backgroundColor: string;
   highContrast: boolean;
   showSpeakerLabels: boolean;
+  liveCaptionAnimation: boolean;
 }
 
 export interface TranscriptionWord {
@@ -70,6 +71,7 @@ export const DEFAULT_CAPTION_SETTINGS: CaptionSettings = {
   backgroundColor: '#0A1628',
   highContrast: true,
   showSpeakerLabels: true,
+  liveCaptionAnimation: true,
 };
 
 export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
